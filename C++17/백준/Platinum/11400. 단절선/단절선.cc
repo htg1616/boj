@@ -17,19 +17,18 @@ int dfs(int now, int parent){
     for(int nxt: adj[now]){
         if(discover[nxt] == -1){
             int subtree = dfs(nxt, now);
+            if(subtree > discover[now]){
+                if(now < nxt)
+                    cut_edges.push_back({now, nxt});
+                else
+                    cut_edges.push_back({nxt, now});
+                k++;
+            }
             ret = min(ret, subtree);
         }
         else if(nxt != parent){
             ret = min(ret, discover[nxt]);
         }
-    }
-
-    if(ret > discover[parent]){
-        if(now < parent)
-            cut_edges.push_back({now, parent});
-        else
-            cut_edges.push_back({parent, now});
-        k++;
     }
     return ret;
 }
