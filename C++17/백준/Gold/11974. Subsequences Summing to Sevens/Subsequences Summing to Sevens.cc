@@ -12,22 +12,19 @@ int main() {
 
     int n;
     cin >> n;
-    vector<int> psum(1+n);
-    for(int i=0; i<n; i++){
-        cin >> psum[i+1];
-        psum[i+1] = (psum[i] + psum[i+1]) % 7;
-    }
+    vector<int> first(7, -1);
+    first[0] = 0;
     int ans = 0;
-    for(int i=0; i<7; i++){
-        int minp = 100000;
-        int maxp = -1;
-        for(int j=0; j<=n; j++){
-            if(psum[j] == i){
-                minp = min(minp, j);
-                maxp = max(maxp, j);
-            }
+    int curr = 0;
+    for(int i=1; i<=n; i++){
+        int num;
+        cin >> num;
+        curr = (curr + num)%7;
+
+        if(first[curr] == -1){
+            first[curr] = i;
         }
-        ans = max(ans, maxp-minp);
+        else ans = max(ans, i - first[curr]);
     }
 
     cout << ans;
