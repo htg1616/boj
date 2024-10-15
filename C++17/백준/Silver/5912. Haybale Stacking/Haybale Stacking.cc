@@ -12,21 +12,19 @@ int main() {
 
     int n, k;
     cin >> n >> k;
-    vector<int> lsum(1+n), rsum(1+n);
+    vector<int> diff(1+n);
     for(int i=0; i<k; i++){
         int a, b;
         cin >> a >> b;
-        lsum[a]++;
-        rsum[b]++;
+        a--; b--;
+        diff[a]++;
+        diff[b+1]--;
     }
-    for(int i=1; i<=n; i++){
-        lsum[i] += lsum[i-1];
-        rsum[i] += rsum[i-1];
-    }
-
+    int res = 0;
     vector<int> hay;
-    for(int i=1; i<=n; i++){
-        hay.push_back(lsum[i] - rsum[i-1]);
+    for(int i=0; i<n; i++){
+        res += diff[i];
+        hay.push_back(res);
     }
     sort(hay.begin(), hay.end());
     cout << hay[n/2];
