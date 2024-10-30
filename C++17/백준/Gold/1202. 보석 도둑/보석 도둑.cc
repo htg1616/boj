@@ -12,23 +12,25 @@ int main() {
 
     int n, k;
     cin >> n >> k;
-    vector<pair<int, int>> gems(n);
-    multiset<int> bags; //x: v, y: m
-    for(int i=0; i<n; i++) cin >> gems[i].Y >> gems[i].X;
-    for(int i=0; i<k; i++){
-        int num;
-        cin >> num;
-        bags.insert(num);
-    }
-    sort(rbegin(gems), rend(gems));
+    vector<pair<int, int>> gems(n); //x: m, y: v
+    vector<int> bags(k);
+    for(int i=0; i<n; i++) cin >> gems[i].X >> gems[i].Y;
+    for(int i=0; i<k; i++) cin >> bags[i];
+    sort(begin(gems), end(gems));
+    sort(begin(bags), end(bags));
+
+    priority_queue<int> avail;
 
     ll ans = 0;
-    for(auto p: gems){
-        int m = p.Y, v = p.X;
-        auto it = bags.lower_bound(m);
-        if(it != bags.end()){
-            bags.erase(it);
-            ans += v;
+    int pos = 0;
+    for(int c: bags){
+        while(pos < n && gems[pos].X <= c){
+            avail.push(gems[pos].Y);
+            pos++;
+        }
+        if(!avail.empty()){
+            ans += avail.top();
+            avail.pop();
         }
     }
 
