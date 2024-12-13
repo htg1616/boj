@@ -12,22 +12,22 @@ int main() {
 
     int n;
     cin >> n;
-    priority_queue<int> max_pq;
-    priority_queue<int, vector<int>, greater<int>> min_pq;
+    priority_queue<int> big;
+    priority_queue<int, vector<int>, greater<int>> small;
     for(int i=0; i<n; i++){
         int p;
         cin >> p;
-        if(max_pq.size() > min_pq.size()){
-            max_pq.push(p);
-            min_pq.push(max_pq.top());
-            max_pq.pop();
+        if(big.size() > small.size()){
+            big.push(p);
+            small.push(big.top());
+            big.pop();
         }
         else{
-            min_pq.push(p);
-            max_pq.push(min_pq.top());
-            min_pq.pop();
+            small.push(p);
+            big.push(small.top());
+            small.pop();
         }
-        cout << max_pq.top() << endl;
+        cout << big.top() << endl;
     }
     return 0;
 }
