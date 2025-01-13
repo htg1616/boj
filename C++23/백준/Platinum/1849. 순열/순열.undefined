@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+class segment_tree{
+    int n;
+    vector<int> tree;
+
+    void init(int v, int tl, int tr, const vector<int>& a){
+        if(tr-tl == 1) tree[v] = a[tl];
+        else{
+            int tm = (tl+tr)/2;
+            init(2*v, tl, tm, a);
+            init(2*v+1, tm, tr, a);
+            tree[v] = tree[2*v] + tree[2*v+1];
+        }
+    }
+
+    void update(int v, int tl, int tr, int i, int x){
+        if(tr-tl==1){
+            tree[v] = x;
+            return;
+        }
+        int tm = (tl+tr)/2;
+        if(i < tm) update(2*v, tl, tm, i, x);
+        else update(2*v+1, tm, tr, i, x);
+        tree[v] = tree[2*v] + tree[2*v+1];
+    }
+
+    int query(int v, int tl, int tr, int x){
+        if(tr-tl==1) return tl;
+        int tm = (tl+tr)/2;
+        if(x <= tree[2*v]) return query(2*v, tl, tm, x);
+        else return query(2*v+1, tm, tr, x-tree[2*v]);
+    }
+
+public:
+    segment_tree(const vector<int>& a){
+        n = a.size();
+        tree.resize(4*n);
+        init(1, 0, n, a);
+    }
+    
+    segment_tree(int n_=1<<18){
+        n = n_;
+        tree.resize(4*n);
+        vector<int> arr(n);
+        init(1, 0, n, arr);
+    }
+    
+    void update(int i, int x){
+        update(1, 0, n, i, x);
+    }
+
+    int query(int x){
+        return query(1, 0, n, x);
+    }
+};
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+    int n;
+    cin >> n;
+    vector<int> arr(n, 1), ans(n);
+    segment_tree seg(arr);
+    for(int i=1; i<=n; i++){
+        int num;
+        cin >> num;
+        int idx = seg.query(num+1);
+        ans[idx] = i;
+        seg.update(idx, 0);
+    }
+
+    for(int i: ans) cout << i << endl;
+
+    return 0;
+}
