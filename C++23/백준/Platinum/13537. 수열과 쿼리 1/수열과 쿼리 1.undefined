@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+class merge_sort_tree{
+    int n;
+    vector<vector<int>> tree;
+
+    void init(int v, int tl, int tr, const vector<int>& a){
+        if(tr-tl==1){
+            tree[v] = {a[tl]};
+            return;
+        }
+        int tm = (tl+tr)/2;
+        init(2*v, tl, tm, a);
+        init(2*v+1, tm, tr, a);
+        merge(tree[2*v].begin(), tree[2*v].end(), tree[2*v+1].begin(), tree[2*v+1].end(),
+        back_inserter(tree[v]));
+    }
+
+    int query(int v, int tl, int tr, int l, int r, int k){
+        if(r<=tl || tr<=l) return 0;
+        if(l<=tl && tr<=r) return tree[v].end() - upper_bound(tree[v].begin(), tree[v].end(), k);
+        int tm = (tl+tr)/2;
+        return query(2*v, tl, tm, l, r, k) + query(2*v+1, tm, tr, l, r, k);
+    }
+
+public:
+    merge_sort_tree(vector<int> &a){
+        n = a.size();
+        tree.resize(4*n);
+        init(1, 0, n, a);
+    }
+
+    int query(int l, int r, int k){
+        return query(1, 0, n, l, r, k);
+    }
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n;
+    cin >> n;
+    vector<int> a(n);
+    for(int i=0; i<n; i++) cin >> a[i];
+    merge_sort_tree tree(a);
+
+    int m;
+    cin >> m;
+    while(m--){
+        int i, j, k;
+        cin >> i >> j >> k;
+        cout << tree.query(i-1, j, k) << endl;
+    }
+    return 0;
+}
