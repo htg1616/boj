@@ -1,0 +1,104 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+template <typename T>
+class segment_tree{
+    int n;
+    vector<T> tree;
+    vector<T> add;
+
+     void propagate(int v, int tl, int tr){
+        int tm = (tl+tr)/2;
+        tree[2*v] += add[v] * (tm-tl);
+        tree[2*v+1] += add[v] * (tr-tm);
+        add[2*v] += add[v];
+        add[2*v+1] += add[v];
+        add[v] = 0;
+    }
+
+    void init(int v, int tl, int tr, const vector<T>& a){
+        if(tr-tl == 1) tree[v] = a[tl];
+        else{
+            int tm = (tl+tr)/2;
+            init(2*v, tl, tm, a);
+            init(2*v+1, tm, tr, a);
+            tree[v] = tree[2*v] + tree[2*v+1];
+        }
+    }
+
+    void update(int v, int tl, int tr, int l, int r, ll x){
+        if(l>=tr || tl>=r) return;
+        if(l<=tl && tr<=r){
+            tree[v] += x*(tr-tl);
+            add[v] += x;
+            return;
+        }
+        propagate(v, tl, tr);
+        int tm = (tl+tr)/2;
+        update(2*v, tl, tm, l, r, x);
+        update(2*v+1, tm, tr, l, r, x);
+        tree[v] = tree[2*v] + tree[2*v+1];
+    }
+
+    T query(int v, int tl, int tr, int l, int r){
+        if(l>=tr || r<=tl) return T();
+        if(l<=tl && tr<=r) return tree[v];
+        propagate(v, tl, tr);
+        int tm = (tl+tr)/2;
+        return query(2*v, tl, tm, l, r) + query(2*v+1, tm, tr, l, r);
+    }
+
+public:
+    segment_tree(const vector<T>& a){
+        n = a.size();
+        tree.resize(4*n);
+        add.resize(4*n);
+        init(1, 0, n, a);
+    }
+    
+    void update(int l, int r, ll x){
+        update(1, 0, n, l, r, x);
+    }
+
+    T query(int l, int r){
+        return query(1, 0, n, l, r);
+    }
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n, m, k;
+    cin >> n >> m >> k;
+    vector<__int128_t> arr(n);
+    for(int i=0; i<n; i++){
+        ll num;
+        cin >> num;
+        arr[i] = num;
+    }
+    segment_tree<__int128_t> seg(arr);
+
+    int q=m+k;
+    while(q--){
+        int a;
+        cin >> a;
+        if(a==1){
+            ll b, c, d;
+            cin >> b >> c >> d;
+            seg.update(b-1, c, d);
+        }
+        else{
+            ll b, c;
+            cin >> b >> c;
+            cout << (ll)seg.query(b-1, c) << endl;
+        }
+    }
+    return 0;
+}
