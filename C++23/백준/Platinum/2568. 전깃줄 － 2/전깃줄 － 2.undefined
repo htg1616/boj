@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n;
+    cin >> n;
+    vector<pii> arr(n);
+    for(int i=0; i<n; i++){
+        cin >> arr[i].X >> arr[i].Y;
+    }
+    sort(arr.begin(), arr.end());
+
+    vector<int> b(n), previous(n, -1);
+    for(int i=0; i<n; i++) b[i] = arr[i].Y;
+
+    //lis 구현하기
+    auto cmp = [&](int x, int y){
+        return b[x] < b[y];
+    };
+    set<int, decltype(cmp)> s(cmp);
+    for(int i=0; i<n; i++){
+        auto it = s.insert(i).X;
+        if(it != s.begin()) previous[i] = *prev(it);
+        if(next(it) != s.end()) s.erase(next(it));
+    }
+
+    set<int> lis;
+    for(int i=*s.rbegin(); i!=-1; i=previous[i]) lis.insert(b[i]);
+
+    cout << n - lis.size() << endl;
+    for(int i=0; i<n; i++){
+        if(!lis.count(arr[i].Y)) cout << arr[i].X << endl;
+    }
+    return 0;
+}
