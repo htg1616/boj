@@ -1,0 +1,106 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+class segment_tree{
+    int n;
+    vector<int> tree;
+    vector<int> lazy;
+
+    void init(int v, int tl, int tr, const vector<int>& a){
+        if(tr-tl == 1) tree[v] = a[tl];
+        else{
+            int tm = (tl+tr)/2;
+            init(2*v, tl, tm, a);
+            init(2*v+1, tm, tr, a);
+            tree[v] = tree[2*v] ^ tree[2*v+1];
+        }
+    }
+
+    void __xor(int v, int tl, int tr, int x){
+        if((tr-tl)%2) tree[v] ^= x;
+    }
+
+    void prog(int v, int tl, int tr){
+        int tm = (tl+tr)/2;
+        __xor(2*v, tl, tm, lazy[v]);
+        __xor(2*v+1, tm, tr, lazy[v]);
+        lazy[2*v] ^= lazy[v];
+        lazy[2*v+1] ^= lazy[v];
+        lazy[v] = 0;
+    }
+
+    
+
+    void update(int v, int tl, int tr, int l, int r, int x){
+        if(l>=tr || r<=tl) return;
+        if(l<=tl && tr<=r){
+            __xor(v, tl, tr, x);
+            lazy[v] ^= x;
+            return;
+        }
+        int tm = (tl+tr)/2;
+        prog(v, tl, tr);
+        update(2*v, tl, tm, l, r, x);
+        update(2*v+1, tm, tr, l, r, x);
+        tree[v] = tree[2*v] ^ tree[2*v+1];
+    }
+
+    int query(int v, int tl, int tr, int l, int r){
+        if(l>=tr || r<=tl) return 0;
+        if(l<=tl && tr<=r) return tree[v];
+        int tm = (tl+tr)/2;
+        prog(v, tl, tr);
+        return query(2*v, tl, tm, l, r) ^ query(2*v+1, tm, tr, l, r);
+    }
+
+public:
+    segment_tree(const vector<int>& a){
+        n = a.size();
+        tree.resize(4*n);
+        lazy.resize(4*n);
+        init(1, 0, n, a);
+    }
+    
+    void update(int l, int r, int x){
+        update(1, 0, n, l, r, x);
+    }
+
+    int query(int l, int r){
+        return query(1, 0, n, l, r);
+    }
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n;
+    cin >> n;
+    vector<int> a(n);
+    for(int i=0; i<n; i++) cin >> a[i];
+    segment_tree seg(a);
+
+    int m;
+    cin >> m;
+    while(m--){
+        int t;
+        cin >> t;
+        if(t==1){
+            int a, b, c;
+            cin >> a >> b >> c;
+            seg.update(a, b+1, c);
+        }
+        else{
+            int a;
+            cin >> a;
+            cout << seg.query(a, a+1) << endl;
+        }
+    }
+    return 0;
+}
