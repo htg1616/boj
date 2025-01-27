@@ -1,0 +1,92 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+constexpr ll MOD = 1'000'000'007LL;
+
+class segment_tree{
+    int n;
+    vector<vector<int>> tree;
+
+    void merge(int v){
+        std::merge(tree[2*v].begin(), tree[2*v].end(), tree[2*v+1].begin(), tree[2*v+1].end(), back_inserter(tree[v]));
+    }
+
+    void init(int v, int tl, int tr, const vector<int>& a){
+        if(tr-tl == 1){
+            tree[v] = vector<int>(1, a[tl]);
+            return;
+        }
+        int tm = (tl+tr)/2;
+        init(2*v, tl, tm, a);
+        init(2*v+1, tm, tr, a);
+        merge(v);
+    }
+
+    int query(int v, int tl, int tr, int l, int r, int x){
+        if(l>=tr || r<=tl) return 0;
+        if(l<=tl && tr<=r) return upper_bound(tree[v].begin(), tree[v].end(), x) - tree[v].begin();
+        int tm = (tl+tr)/2;
+        return query(2*v, tl, tm, l, r, x) + query(2*v+1, tm, tr, l, r, x);
+    }
+
+public:
+    segment_tree(const vector<int>& a){
+        n = a.size();
+        tree.resize(4*n);
+        init(1, 0, n, a);
+    }
+
+    int query(int l, int r, int x){
+        return query(1, 0, n, l, r, x);
+    }
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n, m, c;
+    cin >> n >> m >> c;
+    vector<int> arr(n);
+    for(int i=0; i<n; i++) cin >> arr[i];
+    vector<vector<int>> g(n);
+    for(int i=0; i<n-1; i++){
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        g[u].push_back(v);
+        g[v].push_back(u);
+    }
+
+    vector<int> l(n), r(n), a(n);
+    vector<bool> vis(n);
+    int cnt = 0;
+    auto dfs = [&](this auto dfs, int u) -> void{
+        vis[u] = true; l[u] = cnt++;
+        a[l[u]] = arr[u];
+        for(int v: g[u]){
+            if(vis[v]) continue;
+            dfs(v);
+        }
+        r[u] = cnt;
+    };
+
+    dfs(0);
+    
+    ll ans = 0;
+    segment_tree seg(a);
+    while(m--){
+        int v, c;
+        cin >> v >> c;
+        v--;
+        ans = (ans + seg.query(l[v], r[v], c)) % MOD;
+    }
+    cout << ans << endl;
+    return 0;
+}
