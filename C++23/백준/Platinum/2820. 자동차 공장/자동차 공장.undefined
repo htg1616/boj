@@ -1,0 +1,108 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+template <typename T>
+class segment_tree{
+    int n;
+    vector<T> tree;
+
+    void init(int v, int tl, int tr, const vector<T>& a){
+        if(tr-tl == 1) tree[v] = a[tl];
+        else{
+            int tm = (tl+tr)/2;
+            init(2*v, tl, tm, a);
+            init(2*v+1, tm, tr, a);
+        }
+    }
+
+    void update(int v, int tl, int tr, int l, int r, int x){
+        if(l>=tr || r<=tl) return;
+        if(l<=tl && tr<=r){
+            tree[v] += x;
+            return;
+        }
+        int tm = (tl+tr)/2;
+        update(2*v, tl, tm, l, r, x);
+        update(2*v+1, tm, tr, l, r, x);
+    }
+
+    T query(int v, int tl, int tr, int i){
+        if(tr-tl==1) return tree[v];
+        int tm = (tl+tr)/2;
+        if(i < tm) return tree[v] + query(2*v, tl, tm, i);
+        else return tree[v] + query(2*v+1, tm, tr, i);
+    }
+
+public:
+    segment_tree(const vector<T>& a){
+        n = a.size();
+        tree.resize(4*n);
+        init(1, 0, n, a);
+    }
+    
+    void update(int l, int r, T x){
+        update(1, 0, n, l, r, x);
+    }
+
+    T query(int i){
+        return query(1, 0, n, i);
+    }
+};
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n, m;
+    cin >> n >> m;
+    vector<vector<int>> child(n);
+    vector<int> money(n);
+    cin >> money[0];
+    for(int i=1; i<n; i++){
+        int p;
+        cin >> money[i] >> p;
+        p--;
+        child[p].push_back(i);
+    }
+
+    vector<bool> vis(n);
+    vector<int> l(n), r(n);
+    vector<ll> arr(n);
+    int ord = 0;
+    auto dfs = [&](this auto dfs, int u) -> void{
+        vis[u] = true, l[u] = ord++;
+        arr[l[u]] = money[u];
+        for(int v: child[u]){
+            if(vis[v]) continue;
+            dfs(v);
+        }
+        r[u] = ord;
+    };
+    dfs(0);
+
+    segment_tree<ll> seg(arr);
+    while(m--){
+        char o;
+        cin >> o;
+        if(o=='p'){
+            int a, x;
+            cin >> a >> x;
+            a--;
+            seg.update(l[a]+1, r[a], (ll)x);
+        }
+        else{
+            int a;
+            cin >> a;
+            a--;
+            cout << seg.query(l[a]) << endl;
+        }
+    }
+    return 0;
+}
