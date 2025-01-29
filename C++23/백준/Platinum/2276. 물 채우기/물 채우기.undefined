@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+int dx[] = {-1, 1, 0, 0}, dy[] = {0, 0, -1, 1};
+
+void solve(){
+    int n, m;
+    cin >> m >> n;
+    vector<vector<int>> h(n, vector<int>(m));
+    for(int i=0; i<n; i++){
+        for(int j=0; j<m; j++) cin >> h[i][j];
+    }
+
+    int ans = 0;
+    auto comp = [&](pii i, pii j){
+        return h[i.X][i.Y] > h[j.X][j.Y];
+    };
+    priority_queue<pii, vector<pii>, decltype(comp)> pq(comp);
+    vector<vector<bool>> vis(n, vector<bool>(m));
+    for(int i=0; i<n; i++){
+        pq.push({i, 0}); vis[i][0] = true;
+        pq.push({i, m-1}); vis[i][m-1] = true;
+    }
+    for(int j=1; j<m-1; j++){
+        pq.push({0, j}); vis[0][j] = true;
+        pq.push({n-1, j}); vis[n-1][j] = true;
+    }
+
+    while(!pq.empty()){
+        auto [x, y] = pq.top(); pq.pop();
+        for(int i=0; i<4; i++){
+            int nx = x+dx[i], ny = y+dy[i];
+            if(nx<0 || nx>=n || ny<0 || ny>=m || vis[nx][ny]) continue;
+
+            ans += max(h[x][y] - h[nx][ny], 0);
+            h[nx][ny] = max(h[nx][ny], h[x][y]);
+            vis[nx][ny] = true;
+            pq.push({nx, ny});
+        } 
+    }
+
+    cout << ans << endl;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int t=1;
+    while(t--) solve();
+    return 0;
+}
