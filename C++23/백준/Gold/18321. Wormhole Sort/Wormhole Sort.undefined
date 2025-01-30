@@ -1,0 +1,75 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+typedef tuple<int, int, int> Edge;
+
+struct DSU {
+    int n;
+    vector<int> p;
+
+    DSU(int _n){
+        n = _n;
+        p.resize(n);
+        iota(p.begin(), p.end(), 0);
+    }
+
+    int find(int u){
+        if(u != p[u]) p[u] = find(p[u]);
+        return p[u];
+    }
+
+    void merge(int u, int v){
+        u = find(u);
+        v = find(v);
+        p[u] = v;
+    }
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n, m;
+    cin >> n >> m;
+    vector<int> p(n);
+    for(int i=0; i<n; i++) cin >> p[i], p[i]--;
+    vector<Edge> edges(m);
+    for(int i=0; i<m; i++){
+        int a, b, w;
+        cin >> a >> b >> w;
+        a--, b--;
+        edges.push_back({-w, a, b});
+    }
+    sort(edges.begin(), edges.end());
+
+    vector<bool> vis(n);
+    DSU dsu(n);
+    int cnt = -1;
+    int ans = 1<<30;
+    auto dfs = [&](int u, auto &&dfs) -> void{
+        vis[u] = true;
+        int v = p[u];
+        if(!vis[v]){
+            while(dsu.find(u) != dsu.find(v)){
+                auto [minus_w, a, b] = edges[++cnt];
+                ans = min(ans, -minus_w);
+                dsu.merge(a, b);
+            }
+            dfs(v, dfs);
+        }
+    };
+
+    for(int i=0; i<n; i++){
+        if(!vis[i]) dfs(i, dfs);
+    }
+
+    if(ans == 1<<30) cout << -1;
+    else cout << ans;
+    return 0;
+}
