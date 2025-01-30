@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+typedef tuple<ll, int, int> edge;
+
+struct DSU {
+    int n;
+    vector<int> p;
+
+    DSU(int _n){
+        n = _n;
+        p.resize(n);
+        iota(p.begin(), p.end(), 0);
+    }
+
+    int find(int u){
+        if(u != p[u]) p[u] = find(p[u]);
+        return p[u];
+    }
+
+    void merge(int u, int v){
+        u = find(u);
+        v = find(v);
+        p[u] = v;
+    }
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n;
+    cin >> n;
+    vector<pll> pos(n);
+    for(int i=0; i<n; i++) cin >> pos[i].X >> pos[i].Y;
+    vector<edge> edges;
+    for(int i=0; i<n; i++){
+        for(int j=i+1; j<n; j++){
+            ll d = (pos[i].X - pos[j].X)*(pos[i].X - pos[j].X) + (pos[i].Y - pos[j].Y)*(pos[i].Y - pos[j].Y);
+            edges.push_back({d, i, j});
+        }
+    }
+    sort(edges.begin(), edges.end());
+
+    ll ans = 0;
+    DSU dsu(n);
+    for(auto [d, u, v]: edges){
+        if(dsu.find(u) != dsu.find(v)){
+            dsu.merge(u, v);
+            ans = max(ans, d);
+        }
+    }
+
+    cout << ans;
+
+    return 0;
+}
