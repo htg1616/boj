@@ -1,0 +1,98 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+struct DSU {
+    int n;
+    vector<int> p;
+    vector<int> size;
+
+    DSU(int _n){
+        n = _n;
+        p.resize(n);
+        iota(p.begin(), p.end(), 0);
+        size = vector<int>(n, 1);
+    }
+
+    int find(int u){
+        if(u != p[u]) p[u] = find(p[u]);
+        return p[u];
+    }
+
+    void merge(int u, int v){
+        u = find(u);
+        v = find(v);
+        if(u == v) return;
+        if(size[u] < size[v]) swap(u, v);
+        p[v] = u;
+        size[u] += size[v];
+    }
+
+    bool same(int u, int v){
+        return find(u) == find(v);
+    }
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    // input
+    int n, m;
+    cin >> n >> m;
+    vector<tuple<int, int, int>> edge(m);
+    for(int i=0; i<m; i++){
+        int a, b, c;
+        cin >> a >> b >> c;
+        a--, b--;
+        edge[i] = {c, a, b};
+    }
+    sort(edge.begin(), edge.end());
+
+    int q;
+    cin >> q;
+    vector<pair<int, int>> query(q);
+    for(int i=0; i<q; i++){
+        int x, y;
+        cin >> x >> y;
+        x--, y--;
+        query[i] = {x, y};
+    }
+
+    // solve
+    vector<int> l(q), r(q, m+1), size(q);
+    while(true){
+        bool flag = false;
+        vector<vector<int>> check(m+1);
+        for(int i=0; i<q; i++){
+            if(l[i]+1 < r[i]){
+                flag = true;
+                check[(l[i]+r[i])/2].push_back(i);
+            }
+        }
+        if(!flag) break;
+
+        DSU dsu(n);
+
+        for(int i=0; i<m; i++){
+            auto [c, a, b] = edge[i];
+            dsu.merge(a, b);
+            for(int j: check[i+1]){
+                auto [x, y] = query[j];
+                if(dsu.same(x, y)) r[j] = i+1, size[j] = dsu.size[dsu.find(x)];
+                else l[j] = i+1;
+            }
+        }
+    }
+
+    for(int i=0; i<q; i++){
+        if(l[i] == m) cout << -1 << endl;
+        else cout << get<0>(edge[r[i]-1]) << ' ' << size[i] << endl;
+    }
+    return 0;
+}
