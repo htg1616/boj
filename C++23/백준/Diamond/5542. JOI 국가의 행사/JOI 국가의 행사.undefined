@@ -1,0 +1,120 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+typedef tuple<int, int, int> edge;
+
+constexpr int INF = 1'000'000'000;
+
+struct DSU {
+    int n;
+    vector<int> p;
+    vector<int> size;
+
+    DSU(int _n){
+        n = _n;
+        p.resize(n);
+        iota(p.begin(), p.end(), 0);
+        size = vector<int>(n, 1);
+    }
+
+    int find(int u){
+        if(u != p[u]) p[u] = find(p[u]);
+        return p[u];
+    }
+
+    void merge(int u, int v){
+        u = find(u);
+        v = find(v);
+        if(u == v) return;
+        if(size[u] < size[v]) swap(u, v);
+        p[v] = u;
+        size[u] += size[v];
+    }
+
+   bool same(int u, int v){
+      return find(u) == find(v);
+   }
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n, m, k, q;
+    cin >> n >> m >> k >> q;
+    vector<vector<pii>> adj(n);
+    vector<edge> edges;
+    for(int i=0; i<m; i++){
+        int a, b, c;
+        cin >> a >> b >> c;
+        a--, b--;
+        adj[a].emplace_back(b, c);
+        adj[b].emplace_back(a, c);
+        edges.emplace_back(a, b, c);
+    }
+    vector<int> party(k);
+    for(int i=0; i<k; i++){
+        cin >> party[i];
+        party[i]--;
+    }
+    vector<pii> query(q);
+    for(int i=0; i<q; i++){
+        cin >> query[i].X >> query[i].Y;
+        query[i].X--, query[i].Y--;
+    }
+
+    vector<int> dist(n, INF); //각 노드가 축제를 하는 도시와 떨어진 거리
+    priority_queue<pii, vector<pii>, greater<pii>> pq;
+    for(int i=0; i<k; i++){
+        pq.emplace(0, party[i]);
+        dist[party[i]] = 0;
+    }
+    while(!pq.empty()){
+        auto [d, u] = pq.top(); pq.pop();
+        if(dist[u] < d) continue;
+        for(auto [v, c]: adj[u]) if(dist[v] > d+c){
+            dist[v] = d+c;
+            pq.emplace(dist[v], v);
+        }
+    }
+    
+    auto comp = [&](edge i, edge j){
+        auto [a1, b1, c1] = i;
+        auto [a2, b2, c2] = j;
+        return min(dist[a1], dist[b1]) > min(dist[a2], dist[b2]); 
+    };
+    sort(edges.begin(), edges.end(), comp);
+
+    vector<int> start(q), end(q, m+1);
+    while(true){
+        bool flag = false;
+        vector<vector<int>> check(m+1);
+        for(int i=0; i<q; i++) if(start[i]+1 < end[i]){
+            flag = true;
+            check[(start[i]+end[i])/2].push_back(i);
+        }
+        if(!flag) break;
+
+        DSU dsu(n);
+        for(int i=0; i<m; i++){
+            auto [a, b, c] = edges[i];
+            dsu.merge(a, b);
+            for(int j: check[i+1]){
+                if(dsu.same(query[j].X, query[j].Y)) end[j]=i+1;
+                else start[j]=i+1;
+            }
+        }
+    }
+
+    for(int i=0; i<q; i++){
+        auto [a, b, c] = edges[end[i]-1];
+        cout << min(dist[a], dist[b]) << endl;
+    }
+
+    return 0;
+}
