@@ -1,0 +1,42 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n, q;
+    cin >> n;
+    vector<int> a(n);
+    set<int> s;
+    ll res = 0;
+    for(int i=0; i<n; i++){
+        cin>>a[i];
+        s.insert(a[i]);
+        res += a[i];
+    }
+    cin >> q;
+    while(q--){
+        int k;
+        cin>>k;
+        if(s.count(n)){
+            s.erase(n);
+            res -= n;
+            n--;
+        }
+        else{
+            s.insert(n);
+            res += n;
+            n++;
+        }
+        cout << res << endl;
+    }
+    return 0;
+}
