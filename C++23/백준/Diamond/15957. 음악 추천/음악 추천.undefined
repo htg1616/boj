@@ -1,0 +1,136 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+class segment_tree{
+    int n;
+    vector<ll> tree;
+
+    void init(int v, int tl, int tr, const vector<ll>& a){
+        if(tr-tl == 1) tree[v] = a[tl];
+        else{
+            int tm = (tl+tr)/2;
+            init(2*v, tl, tm, a);
+            init(2*v+1, tm, tr, a);
+        }
+    }
+
+    void update(int v, int tl, int tr, int l, int r, ll x){
+        if(r<=tl || tr<=l) return;
+        if(l<=tl && tr<=r){
+            tree[v] += x;
+            return;
+        }
+        int tm = (tl+tr)/2;
+        update(2*v, tl, tm, l, r, x);
+        update(2*v+1, tm, tr, l, r, x);
+    }
+
+    ll query(int v, int tl, int tr, int i){
+        if(tr-tl == 1) return tree[v];
+        int tm = (tl+tr)/2;
+        if(i < tm) return tree[v] + query(2*v, tl, tm, i);
+        else return tree[v] + query(2*v+1, tm, tr, i);
+    }
+
+public:
+    segment_tree(int n_=1<<18){
+        n = n_;
+        tree.resize(4*n);
+        vector<ll> a(n);
+        init(1, 0, n, a);
+    }
+    
+    void update(int l, int r, ll x){
+        update(1, 0, n, l, r, x);
+    }
+
+    ll query(int i){
+        return query(1, 0, n, i);
+    }
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n, k, J;
+    cin >> n >> k >> J;
+    vector<vector<int>> child(n);
+    for(int i=1; i<n; i++){
+        int parent;
+        cin >> parent; parent--;
+        child[parent].push_back(i);
+    }
+
+    vector<int> singer(n);
+    for(int i=0; i<n; i++){
+        cin >> singer[i];
+        singer[i]--;
+    }
+    vector<int> tmp = singer;
+    sort(tmp.begin(), tmp.end());
+    tmp.erase(unique(tmp.begin(), tmp.end()), tmp.end());
+    for(int i=0; i<n; i++){
+        singer[i] = lower_bound(tmp.begin(), tmp.end(), singer[i]) - tmp.begin();
+    }
+    int m = singer.size();
+    vector<vector<int>> song(m);
+    for(int i=0; i<n; i++) song[singer[i]].push_back(i);
+
+    vector<tuple<int, int, int>> task;
+    for(int i=0; i<k; i++){
+        int t, p, s;
+        cin >> t >> p >> s;
+        p--;
+        task.emplace_back(t, p, s);
+    }
+    sort(task.begin(), task.end());
+
+    vector<int> left(n), right(n);
+    int cnt = 0;
+    auto dfs = [&](auto &&dfs, int u) -> void{
+        left[u] = cnt++;
+        for(int v: child[u]) dfs(dfs, v);
+        right[u] = cnt;
+    };
+    dfs(dfs, 0);
+
+    vector<int> start(m, 0), end(m, k+1);
+    while(true){
+        bool flag = false;
+        vector<vector<int>> check(k+1);
+        for(int i=0; i<m; i++){
+            if(start[i]+1 < end[i]){
+                flag = true;
+                check[(start[i]+end[i])/2].push_back(i);
+            }
+        }
+        if(!flag) break;
+
+        segment_tree seg(n);
+        for(int i=0; i<k; i++){
+            auto [t, p, s]= task[i];
+            seg.update(left[p], right[p], s/(right[p]-left[p]));
+
+            for(int j: check[i+1]){
+                ll cnt = 0;
+                for(int k: song[j]) cnt += seg.query(left[k]);
+                if(cnt > J*(ll)song[j].size()) end[j] = i+1;
+                else start[j] = i+1;
+            }
+        }
+    }
+
+    for(int i=0; i<n; i++){
+        if(end[singer[i]] == k+1) cout << -1 << endl;
+        else cout << get<0>(task[end[singer[i]]-1]) << endl;
+    }
+
+    return 0;
+}
