@@ -1,0 +1,118 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+constexpr int MOD = 1'000'000'007;
+
+template <typename T>
+class segment_tree{
+    int n;
+    vector<T> tree;
+
+    void init(int v, int tl, int tr, const vector<T>& a){
+        if(tr-tl == 1) tree[v] = a[tl];
+        else{
+            int tm = (tl+tr)/2;
+            init(2*v, tl, tm, a);
+            init(2*v+1, tm, tr, a);
+            tree[v] = tree[2*v] + tree[2*v+1];
+        }
+    }
+
+    void update(int v, int tl, int tr, int i, T x){
+        if(tr-tl==1){
+            tree[v] = x;
+            return;
+        }
+        int tm = (tl+tr)/2;
+        if(i < tm) update(2*v, tl, tm, i, x);
+        else update(2*v+1, tm, tr, i, x);
+        tree[v] = tree[2*v] + tree[2*v+1];
+    }
+
+    T query(int v, int tl, int tr, int l, int r){
+        if(l>=tr || r<=tl) return T();
+        if(l<=tl && tr<=r) return tree[v];
+        int tm = (tl+tr)/2;
+        return query(2*v, tl, tm, l, r) + query(2*v+1, tm, tr, l, r);
+    }
+
+public:
+    segment_tree(const vector<T>& a){
+        n = a.size();
+        tree.resize(4*n);
+        init(1, 0, n, a);
+    }
+    
+    segment_tree(int n_=1<<18){
+        n = n_;
+        tree.resize(4*n);
+        vector<T> a(n);
+        init(1, 0, n, a);
+    }
+    
+    void update(int i, T x){
+        update(1, 0, n, i, x);
+    }
+
+    T query(int l, int r){
+        return query(1, 0, n, l, r);
+    }
+};
+
+struct Node{
+    int num, cnt;
+
+    Node operator+(Node other){
+        if(num == other.num) return Node(num, (cnt+other.cnt)%MOD);
+        else if(num < other.num) return other;
+        else return Node(num, cnt);
+    }
+
+    Node(int _num, int _cnt){
+        num = _num;
+        cnt = _cnt;
+    }
+
+    Node(){
+        num = 0;
+        cnt = 0;
+    }
+};
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n;
+    cin >> n;
+    vector<int> a(n);
+    vector<pii> task;
+    for(int i=0; i<n; i++){
+        cin >> a[i];
+        task.push_back({a[i], i});
+    }
+    sort(task.begin(), task.end(), [&](pii x, pii y){
+        if(x.first == y.first) return x.second > y.second;
+        return x.first < y.first;
+    });
+
+    segment_tree<Node> seg(n);
+
+    for(auto [x, i]: task){
+        Node node = seg.query(0, i);
+        node.num++;
+        if(node.cnt == 0) node.cnt=1;
+        seg.update(i, node);
+    }
+
+    Node ans = seg.query(0, n);
+    cout << ans.num << ' ' << ans.cnt << endl;
+    return 0;
+}
