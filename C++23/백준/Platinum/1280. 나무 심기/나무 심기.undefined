@@ -1,0 +1,113 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+constexpr int MOD = 1'000'000'007;
+const int MAX_POS = 200'000;
+
+template <typename T>
+class segment_tree{
+    int n;
+    vector<T> tree;
+
+    void init(int v, int tl, int tr, const vector<T>& a){
+        if(tr-tl == 1) tree[v] = a[tl];
+        else{
+            int tm = (tl+tr)/2;
+            init(2*v, tl, tm, a);
+            init(2*v+1, tm, tr, a);
+            tree[v] = tree[2*v] + tree[2*v+1];
+        }
+    }
+
+    void update(int v, int tl, int tr, int i, T x){
+        if(tr-tl==1){
+            tree[v] = x;
+            return;
+        }
+        int tm = (tl+tr)/2;
+        if(i < tm) update(2*v, tl, tm, i, x);
+        else update(2*v+1, tm, tr, i, x);
+        tree[v] = tree[2*v] + tree[2*v+1];
+    }
+
+    T query(int v, int tl, int tr, int l, int r){
+        if(l>=tr || r<=tl) return T();
+        if(l<=tl && tr<=r) return tree[v];
+        int tm = (tl+tr)/2;
+        return query(2*v, tl, tm, l, r) + query(2*v+1, tm, tr, l, r);
+    }
+
+public:
+    segment_tree(const vector<T>& a){
+        n = a.size();
+        tree.resize(4*n);
+        init(1, 0, n, a);
+    }
+    
+    segment_tree(int n_=1<<18){
+        n = n_;
+        tree.resize(4*n);
+        vector<T> a(n);
+        init(1, 0, n, a);
+    }
+    
+    void update(int i, T x){
+        update(1, 0, n, i, x);
+    }
+
+    T query(int l, int r){
+        return query(1, 0, n, l, r);
+    }
+};
+
+struct Node{
+    ll sum, cnt;
+
+    Node operator+(Node other){
+        return Node(sum+other.sum, cnt+other.cnt);
+    }
+
+    Node(){
+        sum=0;
+        cnt=0;
+    }
+
+    Node(ll _sum, ll _cnt){
+        sum = _sum;
+        cnt = _cnt;
+    }
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n;
+    cin >> n;
+    segment_tree<Node> seg(MAX_POS+1);
+
+    ll ans = 1;
+    for(int i=0; i<n; i++){
+        int x;
+        cin >> x;
+
+        ll res = 0;
+        Node query = seg.query(0, x);
+        res += query.cnt*x - query.sum;
+        query = seg.query(x, MAX_POS+1);
+        res += query.sum - query.cnt*x;
+        res %= MOD;
+        if(i > 0) ans = ans*res % MOD;
+
+        seg.update(x, seg.query(x, x+1) + Node(x, 1));
+    }
+
+    cout << ans;
+    return 0;
+}
