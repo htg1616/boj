@@ -1,0 +1,37 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    vector<vector<__int128_t>> dp(170, vector<__int128_t>(2));
+    dp[1] = {1, 1};
+    for(int i=2; i<170; i++){
+        dp[i][1] = dp[i-1][0];
+        dp[i][0] = dp[i-1][0] + dp[i-1][1];
+    }
+
+    ll k;
+    cin >> k;
+    k++; //이친수에 0 포함하여 생각
+    bool start = false;
+    for(int i=169; i>0; i--){
+        if(k > dp[i][0]){
+            start = true;
+            k-= dp[i][0];
+            cout << 1;
+        }
+        else{
+            if(start) cout << 0;
+        }
+    }
+    return 0;
+}
