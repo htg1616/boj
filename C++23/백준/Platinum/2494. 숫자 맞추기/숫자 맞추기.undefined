@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+int main()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    int n;
+    cin >> n;
+    string s1, s2;
+    cin >> s1 >> s2;
+
+    vector<vector<int>> dp(n, vector<int>(10, -1));
+    vector<vector<int>> move(n, vector<int>(10, -1));
+    auto cnt = [&](auto &&cnt, int m, int k) -> int { // m: 나사, k: 0~m-1 나사에서 왼쪽으로 돌린 수
+        if (n == m)
+            return 0;
+        int &ret = dp[m][k];
+        if (ret != -1)
+            return ret;
+
+        int i = (s1[m] - '0' + k) % 10, j = s2[m] - '0';
+        int rev_spin = (i - j + 10) % 10, spin = (j - i + 10) % 10;
+        int ret1 = cnt(cnt, m + 1, k) + rev_spin, ret2 = cnt(cnt, m + 1, (k + spin) % 10) + spin;
+        if(ret1 <= ret2){
+            ret = ret1;
+            move[m][k] = -rev_spin;
+        } else{
+            ret = ret2;
+            move[m][k] = spin;
+        }
+        return ret;
+    };
+
+    int ans = cnt(cnt, 0, 0);
+    cout << ans << endl;
+    int k=0;
+    for(int i=0; i<n; i++){
+        cout << i+1 << ' ' << move[i][k] << endl;
+        if(move[i][k] > 0) k = (k+move[i][k]+10)%10;
+    }
+    return 0;
+}
