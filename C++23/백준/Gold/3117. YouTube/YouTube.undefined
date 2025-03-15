@@ -1,0 +1,42 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+constexpr int MAX_T = 30;
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n, k, m;
+    cin >> n >> k >> m;
+
+    vector<int> start(n);
+    for(int i=0; i<n; i++){
+        cin >> start[i];
+        start[i]--;
+    }
+    vector<vector<int>> next(k, vector<int>(MAX_T));
+    for(int i=0; i<k; i++){
+        cin >> next[i][0];
+        next[i][0]--;
+    }
+    for(int j=1; j<MAX_T; j++){
+        for(int i=0; i<k; i++) next[i][j]=next[next[i][j-1]][j-1];
+    }
+
+    for(int i=0; i<n; i++){
+        int ans = start[i];
+        for(int exp=0; exp<MAX_T; exp++) if((m-1) & (1<<exp)){
+            ans = next[ans][exp];
+        }
+        cout << ans+1 << ' ';
+    }
+
+    return 0;
+}
