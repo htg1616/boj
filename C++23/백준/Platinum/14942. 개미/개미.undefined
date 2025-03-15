@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+constexpr int MAX_D = 17, INF = 1'000'000;
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n;
+    cin >> n;
+    vector<int> energy(n);
+    for(int i=0; i<n; i++) cin >> energy[i];
+    vector<vector<pii>> adj(n);
+    for(int i=0; i<n-1; i++){
+        int a, b, c;
+        cin >> a >> b >> c;
+        adj[a-1].emplace_back(b-1, c);
+        adj[b-1].emplace_back(a-1, c);
+    }
+
+    vector<vector<pii>> next(n, vector<pii>(MAX_D));
+    auto dfs = [&](auto &&dfs, int u, int p=-1) -> void{
+        for(auto [v, d]: adj[u]){
+            if(v==p) continue;
+            next[v][0] = {u, d};
+            dfs(dfs, v, u);
+        }
+    };
+    dfs(dfs, 0);
+    next[0][0] = {0, 1};
+
+    for(int j=1; j<MAX_D; j++){
+        for(int i=0; i<n; i++){
+            auto [p1, d1] = next[i][j-1];
+            auto [p2, d2] = next[p1][j-1];
+            next[i][j] = {p2, d1+d2};
+        }
+    }
+
+    for(int i=0; i<n; i++){
+        int c = energy[i];
+        int pos = i;
+        for(int j=MAX_D-1; j>=0; j--){
+            if(c >= next[pos][j].second){
+                c -= next[pos][j].second;
+                pos = next[pos][j].first;
+            }
+        }
+
+        cout << pos+1 << endl;
+    }
+    return 0;
+}
