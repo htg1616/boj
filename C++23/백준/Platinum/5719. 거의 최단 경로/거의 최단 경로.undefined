@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+constexpr int INF = 1'000'000;
+
+void solve(int n, int m){
+    int ss, dd;
+    cin >> ss >> dd;
+    vector<vector<pii>> adj(n);
+    vector<vector<pii>> rev_adj(n);
+    vector<vector<bool>> valid(n, vector<bool>(n, true));
+
+    for(int i=0; i<m; i++){
+        int u, v, p;
+        cin >> u >> v >> p;
+        adj[u].emplace_back(v, p);
+        rev_adj[v].emplace_back(u, p);
+    }
+
+    auto dijkstra = [&](int start){
+        vector<bool> vis(n);
+        vector<int> dist(n, INF); dist[start] = 0;
+        priority_queue<pii, vector<pii>, greater<pii>> pq; pq.emplace(0, start);
+        while(!pq.empty()){
+            int u = pq.top().second; pq.pop();
+            if(vis[u]) continue;
+            vis[u] = true;
+            for(auto [v, d]: adj[u]){
+                if(!valid[u][v]) continue;
+                if(dist[v] <= dist[u]+d) continue;
+                dist[v] = dist[u]+d;
+                pq.emplace(dist[v], v);
+            }
+        }
+
+        return dist;
+    };
+    vector<int> dist = dijkstra(ss);
+
+    vector<bool> vis(n);
+    auto dfs = [&](auto &&dfs, int u) -> void{
+        vis[u] = true;
+        for(auto [v, d]: rev_adj[u]){
+            if(dist[v]+d == dist[u]){
+                valid[v][u] = false;
+                if(!vis[v]) dfs(dfs, v);
+            }
+        }
+    };
+    dfs(dfs, dd);
+    
+    dist = dijkstra(ss);
+    if(dist[dd] == INF) cout << -1 << endl;
+    else cout << dist[dd] << endl;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n, m;
+    while(true){
+        cin >> n >> m;
+        if(n==0 && m==0) break;
+        solve(n, m);
+    }
+    return 0;
+}
