@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+typedef tuple<int, int, int, int> Edge;
+
+constexpr int INF = 100'000'000;
+
+void solve(){
+    int n, m, k;
+    cin >> n >> m >> k;
+
+    vector<Edge> edges(k);
+    for(int i=0; i<k; i++){
+        int u, v, c, d;
+        cin >> u >> v >> c >> d;
+        u--, v--;
+        edges[i] = {u, v, c, d};
+    }
+
+    vector<vector<int>> dist(m+1, vector<int>(n, INF));
+    dist[0][0] = 0;
+    for(int cost=1; cost<=m; cost++){
+        for(int i=0; i<n; i++) dist[cost][i] = dist[cost-1][i];
+        for(auto [u, v, c, d]: edges){
+            if(c > cost) continue;
+            dist[cost][v] = min(dist[cost][v], dist[cost-c][u]+d);
+        }
+    }
+
+    if(dist[m][n-1] == INF) cout << "Poor KCM";
+    else cout << dist[m][n-1];
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int t;
+    cin >> t;
+    while(t--) solve();
+    return 0;
+}
