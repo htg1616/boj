@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+constexpr int mod = 1'000'000'000;
+
+ll dp[100][10][1024];
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n;
+    cin >> n;
+    for(int j=1; j<10; j++){
+        dp[0][j][1<<j] = 1;
+    }
+    for(int i=1; i<n; i++){
+        for(int j=0; j<10; j++){
+            for(int s=0; s<1024; s++){
+                if(!(s&(1<<j))) continue;
+
+                ll &ret = dp[i][j][s];
+                if(j > 0 && s & (1<<(j-1))){
+                    ret += dp[i-1][j-1][s];
+                    ret += dp[i-1][j-1][s & ~(1<<(j))];
+                }
+                if(j < 9 && s & (1<<(j+1))){
+                   ret += dp[i-1][j+1][s];
+                   ret += dp[i-1][j+1][s & ~(1<<(j))];
+                }
+                dp[i][j][s] %= mod;
+            }
+        }
+    }
+
+    ll ans = 0;
+    for(int j=0; j<10; j++) ans += dp[n-1][j][1023];
+    cout << ans%mod;
+    return 0;
+}
