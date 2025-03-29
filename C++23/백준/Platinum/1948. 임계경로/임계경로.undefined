@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n, m;
+    cin >> n >> m;
+    vector<vector<pii>> adj(n);
+    for(int i=0; i<m; i++){
+        int u, v, c;
+        cin >> u >> v >> c;
+        adj[u-1].emplace_back(v-1, c);
+    }
+    int start, end;
+    cin >> start >> end; start--, end--;
+
+    vector<int> d(n, -1);
+    d[end] = 0;
+    auto dfs = [&](auto &&dfs, int u)->void{
+        for(auto [v, c]: adj[u]){
+            if(d[v] == -1) dfs(dfs, v);
+            d[u] = max(d[u], d[v]+c);
+        }
+    };
+    dfs(dfs, start);
+    
+    vector<bool> vis(n);
+    int cnt = 0;
+    auto dfs2 = [&](auto &&dfs2, int u) -> void{
+        vis[u] = true;
+        for(auto [v, c]: adj[u]){
+            if(d[v] != -1 && d[v]+c == d[u]){
+                cnt++;
+                if(!vis[v]) dfs2(dfs2, v);
+            }
+        }
+    };
+    dfs2(dfs2, start);
+
+    cout << d[start] << endl;
+    cout << cnt;
+    return 0;
+}
