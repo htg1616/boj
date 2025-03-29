@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n;
+    cin >> n;
+    vector<string> s(n);
+    vector<bool> used(26);
+    vector<int> deg(26);
+    vector<vector<int>> next(26);
+    for(int i=0; i<n; i++){
+        cin >> s[i];
+        for(char j: s[i]) used[j-'a'] = true;
+    }
+
+    for(int i=1; i<n; i++){
+        bool chk = true;
+        if(s[i-1].size() <= s[i].size()) continue;
+        for(int j=0; j<s[i].size(); j++) if(s[i-1][j] != s[i][j]) chk = false;
+        if(!chk) continue;
+        cout << '!';
+        return 0;
+    }
+    for(int i=1; i<n; i++){
+        int m = min(s[i-1].size(), s[i].size());
+        for(int j=0; j<m; j++){
+            if(s[i-1][j] != s[i][j]){
+                next[s[i-1][j]-'a'].push_back(s[i][j]-'a');
+                deg[s[i][j]-'a']++;
+                break;
+            }
+        }
+    }
+
+    queue<int> q;
+    vector<int> ans;
+    bool only = true;
+    int cnt = 0;
+    for(int i=0; i<26; i++) if(used[i]){
+        cnt++;
+        if(deg[i] == 0) q.push(i);
+    }
+
+    while(!q.empty()){
+        if((int)q.size() >= 2) only = false;
+
+        int x = q.front(); q.pop();
+        ans.push_back(x);
+        for(int y: next[x]){
+            if(--deg[y]==0) q.push(y);
+        }
+    }
+    
+    if(ans.size() < cnt) cout << '!';
+    else if(!only) cout << '?';
+    else for(int i: ans) cout << (char)('a'+i);
+    return 0;
+}
