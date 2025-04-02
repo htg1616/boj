@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+vector<bool> visited;
+void dfs(int u, vector<vector<int>> const& adj, vector<int>& output){
+    visited[u] = true;
+    for(int v: adj[u]) if(!visited[v]){
+        dfs(v, adj, output);
+    }
+    output.push_back(u);
+}
+
+void solve(){
+    int n, m;
+    cin >> n >> m;
+    vector<vector<int>> adj(n), adj_rev(n);
+    for(int i=0; i<m; i++){
+        int v, w;
+        cin >> v >> w;
+        adj[v-1].push_back(w-1);
+        adj_rev[w-1].push_back(v-1);
+    }
+
+    vector<int> order;
+    visited.assign(n, false);
+    for(int i=0; i<n; i++) if(!visited[i]) dfs(i, adj, order);
+
+    reverse(order.begin(), order.end());
+    vector<int> parent(n);
+    vector<vector<int>> scc;
+    visited.assign(n, false);
+    for(int i: order) if(!visited[i]){
+        vector<int> component;
+        dfs(i, adj_rev, component);
+        for(int u: component) parent[u] = i;
+    }
+
+    vector<int> in_degree(n);
+    for(int v=0; v<n; v++){
+        for(int w: adj[v]) if(parent[w] != parent[v]) in_degree[parent[w]]++;
+    }
+
+    int cnt = 0;
+    for(int i=0; i<n; i++) if(i == parent[i] && in_degree[i] == 0) cnt++;
+    cout << cnt << endl;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int t;
+    cin >> t;
+    while(t--) solve();
+    return 0;
+}
