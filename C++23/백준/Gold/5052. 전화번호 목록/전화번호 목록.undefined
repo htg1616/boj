@@ -1,0 +1,65 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+struct Trie{
+    vector<vector<int>> nxt;
+    vector<bool> chk;
+    int unused;
+
+    Trie(int mx){
+        nxt.assign(mx*10+10, vector<int>(10, -1));
+        chk.assign(mx*10+10, false);
+        unused = 1;
+    }
+
+    bool insert(vector<int> num){
+        int curr = 0;
+        bool res = true;
+        for(int i: num){
+            if(nxt[curr][i] == -1){
+                nxt[curr][i] = unused++;
+            }
+            curr = nxt[curr][i];
+            if(chk[curr]) res = false;
+        }
+        chk[curr] = true;
+        return res;
+    }
+};
+
+void solve(){
+    int n;
+    cin >> n;
+
+    Trie trie(n);
+    bool ans = true;
+    vector<pair<int, string>> vis;
+    for(int i=0; i<n; i++){
+        string s;
+        cin >> s;
+        vis.emplace_back(s.size(), s);
+    }
+    sort(vis.begin(), vis.end());
+    for(auto [i, s]: vis){
+        vector<int> num;
+        for(char c: s) num.push_back(c-'0');
+        ans &= trie.insert(num);
+    }
+    cout << (ans ? "YES" : "NO") << endl;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int t;
+    cin >> t;
+    while(t--) solve();
+    return 0;
+}
