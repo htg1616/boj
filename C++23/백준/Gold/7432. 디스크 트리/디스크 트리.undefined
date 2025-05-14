@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+struct Trie{
+    int mx;
+    vector<map<string, int>> nxt;
+    vector<bool> chk;
+    int unused;
+
+    Trie(int n){
+        mx = n;
+        nxt.resize(mx*80+10);
+        chk.assign(mx*80+10, false);
+        unused = 2;
+    }
+
+    void insert(vector<string> vs){
+        int curr = 1;
+        for(string s: vs){
+            if(!nxt[curr].contains(s)) nxt[curr][s] = unused++;
+            curr = nxt[curr][s];
+        }
+        chk[curr] = true;
+    }
+
+    void print(int u, int depth){
+        for(auto [s, v]: nxt[u]){
+            cout << string(depth, ' ') << s << endl;
+            print(v, depth+1);
+        }
+    }
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n;
+    cin >> n;
+    Trie trie(n);
+    for(int i=0; i<n; i++){
+        string line, buffer;
+        cin >> line;
+        istringstream iss(line);
+        vector<string> vs;
+        while(getline(iss, buffer, '\\')) vs.push_back(buffer);
+        trie.insert(vs);
+    }
+
+    trie.print(1, 0);
+    return 0;
+}
