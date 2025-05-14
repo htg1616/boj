@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+constexpr int INF = 1e9;
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n, m;
+    cin >> n >> m;
+    vector<vector<int>> a(n+1, vector<int>(m+1));
+    for(int i=1; i<=n; i++){
+        for(int j=1; j<=m; j++) cin >> a[i][j];
+    }
+
+    vector<vector<int>> pre(n+1, vector<int>(m+1, -INF)), suf(n+1, vector<int>(m+2, -INF)), dp(n+1, vector<int>(m+1, -INF));
+
+    dp[1][0] = 0;
+    for(int j=1; j<=m; j++) dp[1][j] = dp[1][j-1] + a[1][j];
+    for(int i=2; i<=n; i++){
+        for(int j=1; j<=m; j++){
+            pre[i][j] = max(pre[i][j-1], dp[i-1][j]) + a[i][j];
+        }
+        for(int j=m; j>=1; j--){
+            suf[i][j] = max(suf[i][j+1], dp[i-1][j]) + a[i][j];
+        }
+        for(int j=1; j<=m; j++) dp[i][j] = max(pre[i][j], suf[i][j]);
+    }
+
+    cout << dp[n][m];
+
+    return 0;
+}
