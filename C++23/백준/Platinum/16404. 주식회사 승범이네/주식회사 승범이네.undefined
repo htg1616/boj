@@ -1,0 +1,109 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+template <typename T>
+class segment_tree{
+    int n;
+    vector<T> tree;
+
+    void init(int v, int tl, int tr, const vector<T>& a){
+        if(tr-tl == 1) tree[v] = a[tl];
+        else{
+            int tm = (tl+tr)/2;
+            init(2*v, tl, tm, a);
+            init(2*v+1, tm, tr, a);
+            tree[v] = tree[2*v] + tree[2*v+1];
+        }
+    }
+
+    void update(int v, int tl, int tr, int i, T x){
+        if(tr-tl==1){
+            tree[v] += x;
+            return;
+        }
+        int tm = (tl+tr)/2;
+        if(i < tm) update(2*v, tl, tm, i, x);
+        else update(2*v+1, tm, tr, i, x);
+        tree[v] = tree[2*v] + tree[2*v+1];
+    }
+
+    T query(int v, int tl, int tr, int l, int r){
+        if(l>=tr || r<=tl) return T();
+        if(l<=tl && tr<=r) return tree[v];
+        int tm = (tl+tr)/2;
+        return query(2*v, tl, tm, l, r) + query(2*v+1, tm, tr, l, r);
+    }
+
+public:
+    segment_tree(const vector<T>& a){
+        n = a.size();
+        tree.resize(4*n);
+        init(1, 0, n, a);
+    }
+    
+    segment_tree(int n_=1<<18){
+        n = n_;
+        tree.resize(4*n);
+        vector<T> a(n);
+        init(1, 0, n, a);
+    }
+    
+    void update(int i, T x){
+        update(1, 0, n, i, x);
+    }
+
+    T query(int l, int r){
+        return query(1, 0, n, l, r);
+    }
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n, m;
+    cin >> n >> m;
+    vector<vector<int>> child(n);
+    for(int i=0; i<n; i++){
+        int p;
+        cin >> p; p--;
+        if(i!=0) child[p].push_back(i);
+    }
+
+    vector<int> tl(n), tr(n);
+    int unused = 0;
+    auto dfs = [&](auto &&dfs, int u)->void{
+        tl[u] = unused++;
+        for(int v: child[u]){
+            dfs(dfs, v);
+        }
+        tr[u] = unused;
+    };
+    dfs(dfs, 0);
+
+    segment_tree<ll> seg(n+1);
+    for(int i=0; i<m; i++){
+        int op;
+        cin >> op;
+        if(op == 1){
+            int o, w;
+            cin >> o >> w;
+            o--;
+            seg.update(tl[o], w);
+            seg.update(tr[o], -w);
+        }
+        else if(op == 2){
+            int o;
+            cin >> o;
+            o--;
+            cout << seg.query(0, tl[o]+1) << endl;
+        }
+    }
+    return 0;
+}
