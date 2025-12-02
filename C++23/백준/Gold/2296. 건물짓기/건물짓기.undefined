@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int n;
+    cin >> n;
+    vector<vector<int>> build(n, vector<int>(3));
+    vector<int> xarr, yarr;
+    for(int i=0; i<n; i++){
+        int x, y, c;
+        cin >> x >> y >> c;
+        build[i] = {x, y, c};
+        xarr.push_back(x);
+        yarr.push_back(y);
+    }
+
+    sort(xarr.begin(), xarr.end());
+    sort(yarr.begin(), yarr.end());
+    for(int i=0; i<n; i++){
+        build[i][0] = (lower_bound(xarr.begin(), xarr.end(), build[i][0]) - xarr.begin());
+        build[i][1] = (lower_bound(yarr.begin(), yarr.end(), build[i][1]) - yarr.begin());
+    }
+
+    sort(build.begin(), build.end());
+    vector<int> dp1(n), dp2(n);
+    for(int i=0; i<n; i++){
+        int y = build[i][1], c = build[i][2];
+        int max1 = 0, max2 = 0;
+        for(int j=0; j<y; j++) max1 = max(max1, dp1[j]);
+        for(int j=y+1; j<n; j++) max2 = max(max2, dp2[j]);
+        dp1[y] = max1+c;
+        dp2[y] = max2+c;
+    }
+
+    cout << max(*max_element(dp1.begin(), dp1.end()), *max_element(dp2.begin(), dp2.end()));
+    return 0;
+}
