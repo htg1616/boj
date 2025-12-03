@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+constexpr ll MOD = (1e9) + 7;
+
+struct DSU {
+    int n;
+    vector<int> p;
+    vector<int> size;
+    int cnt;
+
+    DSU(int _n) {
+        n = _n;
+        cnt = _n;
+        p.resize(n);
+        iota(p.begin(), p.end(), 0);
+        size = vector<int>(n, 1);
+    }
+
+    int find(int u) {
+        if (u != p[u])
+            p[u] = find(p[u]);
+        return p[u];
+    }
+
+    void merge(int u, int v) {
+        u = find(u);
+        v = find(v);
+        if (u == v)
+            return;
+        cnt--;
+        if (size[u] < size[v])
+            swap(u, v);
+        p[v] = u;
+        size[u] += size[v];
+    }
+
+    bool same(int u, int v) { return find(u) == find(v); }
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    int n, m;
+    cin >> n >> m;
+    vector<vector<ll>> dp(n + 1, vector<ll>(n + 1));
+    dp[0][0] = 1;
+    for (int i = 1; i <= n; i++) {
+        for(int j=1; j<=n; j++){
+            dp[i][j] = (dp[i-1][j-1] + dp[i-1][j] * j)%MOD;
+        }
+    }
+
+    vector<int> table(n+1);
+    for(int i=0; i<=n; i++){
+        for(int j=0; j<=n; j++) table[i] = (table[i] + dp[i][j]) % MOD;
+    }
+
+    DSU dsu(n);
+    for(int i=0; i<m; i++){
+        int x, y;
+        cin >> x >> y;
+        x--, y--;
+        dsu.merge(x, y);
+        cout << table[dsu.cnt] << endl;
+    }
+    return 0;
+}
