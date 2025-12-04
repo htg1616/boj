@@ -1,0 +1,23 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int r;
+    double s;
+    while(cin >> r){
+        cin >> s;
+        double v = sqrt(r*(s+0.16)/0.067);
+        cout << round(v) << endl;
+    }
+    return 0;
+}
