@@ -1,0 +1,36 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+int score(int x, int y){
+    if(x==y) return 10+x;
+    else return (x+y)%10;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int a, b;
+    cin >> a >> b;
+    if(a > b) swap(a, b);
+    if(a==b) b+=10;
+    int cnt = 0;
+    int cnt2 = 0;
+    for(int i=1; i<=20; i++){
+        for(int j=i+1; j<=20; j++){
+            if(a==i || b==j || a==j || b==i) continue;
+            cnt2++;
+            if(score(a, (b-1)%10+1) > score((i-1)%10+1, (j-1)%10+1)) cnt++;
+        }
+    }
+
+    cout << fixed << setprecision(3);
+    cout << (double)cnt / cnt2;
+    return 0;
+}
