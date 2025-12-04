@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+void solve(){
+    ll x1, y1, x2, y2, x3, y3, x4, y4;
+    cin >> x1 >> y1 >> x2 >> y2 >> x3 >> y3 >> x4 >> y4;
+    ll ans = (x2-x1)*(y2-y1);
+
+    ll l = 0, r = 0;
+    if(x1 > x3){
+        swap(x1, x3);
+        swap(x2, x4);
+    }
+    if(x3 <= x2) l = min(x2, x4) - x3; 
+    if(y1 > y3){
+        swap(y1, y3);
+        swap(y2, y4);
+    }
+    if(y3 <= y2) r = min(y2, y4) - y3; 
+    ans -= l*r;
+    cout << ans << endl;
+    
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int t;
+    cin >> t;
+    while(t--) solve();
+    return 0;
+}
