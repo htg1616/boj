@@ -1,0 +1,35 @@
+#include <bits/stdc++.h>
+#define endl '\n'
+#define X first
+#define Y second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+void solve(){
+    int n;
+    cin >> n;
+    vector<int> a(2*n);
+    for(int i=0; i<2*n; i++){
+        cin >> a[i];
+    }
+    for(int i=0; i<n; i++){
+        a.erase(find(a.begin(), a.end(), a[i]/3*4));
+    }
+    for(int i=0; i<n; i++) cout << a[i] << ' ';
+    cout << endl;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+
+    int t;
+    cin >> t;
+    for(int i=1; i<=t; i++){
+        cout << "Case #" << i << ": ";
+        solve();
+    }
+    return 0;
+}
